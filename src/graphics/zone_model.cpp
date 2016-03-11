@@ -45,6 +45,9 @@ void zeq_zone_model_t::generateOctreeFrom(std::vector<ConvVertexBuffer>& vbs, ui
     {
         uint32_t triCount = vb.triangleCount();
         
+        if (triCount == 0)
+            continue;
+        
         if (triCount <= maxTrianglesPerNode && octreeCheckSmallVertexBuffer(vb, temp))
             continue;
         

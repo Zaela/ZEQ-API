@@ -13,6 +13,8 @@ private:
 public:
     zeq_window_t(zeq_t* Z, const char* title, uint32_t width, uint32_t height, int options);
     virtual ~zeq_window_t();
+
+    bool pollInput(zeq_input_t* input);
 };
 
 #endif//_ZEQ_WINDOW_HPP_

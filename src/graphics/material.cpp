@@ -3,7 +3,8 @@
 
 zeq_material_t::zeq_material_t(ConvMaterial& mat)
 : m_diffuseId(0),
-  m_blendType((uint8_t)mat.getBlend())
+  m_blendType((uint8_t)mat.getBlend()),
+  m_texPtr(nullptr)
 {
     m_tint.r = 255;
     m_tint.g = 255;
@@ -15,7 +16,6 @@ zeq_material_t::zeq_material_t(ConvMaterial& mat)
     if (animTex)
     {
         m_isAnimated    = true;
-        m_diffuseId     = 0;
         m_animTexture   = animTex;
         
         animTex->addReferencingMaterial(this);
@@ -111,7 +111,7 @@ void zeq_material_t::registerWithOpenGL()
         m_animTexture->registerWithOpenGL();
         setDiffuseId(m_animTexture->getTexture().getDiffuseId());
     }
-    else
+    else if (m_texture)
     {
         m_texture->registerWithOpenGL();
         setDiffuseId(m_texture->getDiffuseId());

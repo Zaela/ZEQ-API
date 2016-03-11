@@ -44,6 +44,9 @@ void ConvMaterial::prepareTextures(zeq_t* Z)
 
 Texture* ConvMaterial::getTextureSingle()
 {
+    if (m_textures.empty())
+        return nullptr;
+    
     if (!m_texture)
     {
         m_texture = new Texture(std::move(m_textures[0]));

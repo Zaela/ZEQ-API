@@ -83,8 +83,8 @@ HAPIWINDOW= include/zeq_window.h
 ##############################################################################
 DIRWINDOW= src/window/
 BWINDOW= build/$(BUILDTYPE)/window/
-_OWINDOW= window.o
-_HWINDOW= window.hpp
+_OWINDOW= window.o zoneviewer.o
+_HWINDOW= define_window.hpp window.hpp zoneviewer.hpp
 OWINDOW= $(patsubst %,$(BWINDOW)%,$(_OWINDOW))
 HWINDOW= $(patsubst %,$(DIRWINDOW)%,$(_HWINDOW)) $(HAPI) $(HAPIWINDOW)
 
