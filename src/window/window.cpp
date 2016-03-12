@@ -2,8 +2,7 @@
 #include "window.hpp"
 
 zeq_window_t::zeq_window_t(zeq_t* Z, const char* title, uint32_t width, uint32_t height, int options)
-: m_zeq(Z),
-  m_running(true)
+: m_zeq(Z)
 {
     sf::ContextSettings settings;
     settings.depthBits          = 24;

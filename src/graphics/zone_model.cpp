@@ -17,6 +17,11 @@ zeq_zone_model_t::~zeq_zone_model_t()
     {
         VertexBuffer::destroy(vb);
     }
+    
+    for (zeq_model_inst_t* obj : m_staticObjects.placements)
+    {
+        delete obj;
+    }
 }
 
 void zeq_zone_model_t::generateOctree(ConvModel& zone, ConvModel& objects, uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects)
@@ -29,12 +34,6 @@ void zeq_zone_model_t::generateOctree(ConvModel& zone, ConvModel& objects, uint3
     
     generateOctreeFrom(zone.getVertexBuffers(), maxTrianglesPerNode, true);
     generateOctreeFrom(zone.getVertexBuffersNoCollide(), maxTrianglesPerNode, false);
-    
-    // Handle separate zone objects
-    if (!useStaticGeometryForObjects)
-    {
-        //objects
-    }
 }
 
 void zeq_zone_model_t::generateOctreeFrom(std::vector<ConvVertexBuffer>& vbs, uint32_t maxTrianglesPerNode, bool collideable)
@@ -190,7 +189,38 @@ void zeq_zone_model_t::octreeMakeNode(OctreeTemp& temp, ConvVertexBuffer& vb, Tr
 
 void zeq_zone_model_t::addPlacedObjects(ConvModel& objects, int useStaticGeometryForObjects)
 {
+    std::unordered_map<ConvModel*, zeq_model_proto_t*> modelsToPrototypes;
     
+    auto addPlacements = [&](std::vector<ConvModel::ObjectPlacement>& placements, ObjectSet& dst)
+    {
+        for (ConvModel::ObjectPlacement& p : placements)
+        {
+            zeq_model_proto_t* proto;
+            
+            if (modelsToPrototypes.count(p.model))
+            {
+                proto = modelsToPrototypes[p.model];
+            }
+            else
+            {
+                proto = new zeq_model_proto_t(*p.model, ZEQ_MODEL_OBJECT);
+                modelsToPrototypes[p.model] = proto;
+            }
+            
+            zeq_model_inst_t* inst = proto->createInstance();
+            
+            inst->setModelMatrix(p.transform);
+            
+            AABB box;
+            inst->calculateBoundingBox(box);
+            
+            dst.boundingBoxes.push_back(box);
+            dst.placements.push_back(inst);
+        }
+    };
+    
+    if (!useStaticGeometryForObjects)
+        addPlacements(objects.getStaticObjectPlacements(), m_staticObjects);
 }
 
 void zeq_zone_model_t::draw(zeq_camera_t* cam)
@@ -200,6 +230,8 @@ void zeq_zone_model_t::draw(zeq_camera_t* cam)
     
     Frustum& frustum    = cam->getFrustum();
     uint32_t n          = m_boundingBoxes.size();
+    
+    glMatrixMode(GL_MODELVIEW);
     
     if (!m_registeredWithOpenGL)
         registerWithOpenGL();
@@ -224,6 +256,16 @@ void zeq_zone_model_t::draw(zeq_camera_t* cam)
     }
     
     zeq_material_t::deactivateBlend(lastBlend);
+    
+    n = m_staticObjects.boundingBoxes.size();
+    
+    for (uint32_t i = 0; i < n; i++)
+    {
+        if (!frustum.contains(m_staticObjects.boundingBoxes[i]))
+            continue;
+        
+        m_staticObjects.placements[i]->draw();
+    }
 }
 
 void zeq_zone_model_t::registerWithOpenGL()

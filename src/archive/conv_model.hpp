@@ -14,7 +14,7 @@
 
 class ConvModel : public ConvObject
 {
-private:
+public:
     struct ObjectPlacement
     {
         ConvModel*  model;
@@ -69,6 +69,9 @@ public:
     ConvModel* getObjectDefinition(const char* name);
     
     void addObjectPlacement(Mat4& transform, ConvModel* obj);
+    
+    std::vector<ObjectPlacement>& getStaticObjectPlacements() { return m_objectPlacementsStatic; }
+    std::vector<ObjectPlacement>& getAnimatedObjectPlacements() { return m_objectPlacementsAnimated; }
 };
 
 #endif//_ZEQ_CONV_MODEL_HPP_

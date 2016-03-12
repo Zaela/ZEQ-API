@@ -11,6 +11,8 @@
 #include "mat4.hpp"
 #include "vec3.hpp"
 #include "camera.hpp"
+#include "model_prototype.hpp"
+#include "model_instance.hpp"
 #include <string>
 #include <vector>
 #include <unordered_set>
@@ -26,12 +28,24 @@ private:
         AABB box;
     };
     
+    struct ObjectSet
+    {
+        // probably worth splitting placed instances into their individual vertex buffers, ordered by texture;
+        // worth the cost of having more bounding boxes to check against in return for switching textures less
+        // in densely populated zones
+        std::vector<AABB>               boundingBoxes;
+        std::vector<zeq_model_inst_t*>  placements;
+    };
+    
 private:
     std::string m_name;
     bool        m_registeredWithOpenGL;
 
     std::vector<BoundingBox>    m_boundingBoxes;
     std::vector<VertexBuffer*>  m_vertexBuffers;
+
+    ObjectSet m_staticObjects;
+    ObjectSet m_animatedObjects;
 
 private:
     // Structs to hold temp data during octree generation

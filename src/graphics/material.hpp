@@ -34,7 +34,7 @@ public:
     uint32_t getDiffuseId() const { return m_diffuseId; }
     void setDiffuseId(uint32_t id) { m_diffuseId = id; }
     
-    inline bool isInvisible() const { return (zeq_blend_t)m_blendType == ZEQ_BLEND_INVISIBLE; }
+    inline bool isInvisible() const { return (zeq_blend_t)m_blendType == ZEQ_BLEND_INVISIBLE || m_diffuseId == 0; }
     
     inline void setActiveTexture(uint32_t& prevDiffuseId)
     {

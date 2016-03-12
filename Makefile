@@ -59,9 +59,11 @@ CINCLUDE+= -I$(DIRARCHIVE)
 DIRGRAPHICS= src/graphics/
 BGRAPHICS= build/$(BUILDTYPE)/graphics/
 _OGRAPHICS= vertex_buffer.o opengl.o material.o texture.o anim_texture.o \
-  zone_model.o camera.o
+  zone_model.o camera.o model_prototype.o model_instance.o model_static.o \
+ transformable.o
 _HGRAPHICS= vertex.hpp vertex_buffer.hpp opengl.hpp material.hpp texture.hpp \
- anim_texture.hpp zone_model.hpp camera.hpp
+ anim_texture.hpp zone_model.hpp camera.hpp model_prototype.hpp \
+ model_instance.hpp model_static.hpp transformable.hpp
 OGRAPHICS= $(patsubst %,$(BGRAPHICS)%,$(_OGRAPHICS))
 HGRAPHICS= $(patsubst %,$(DIRGRAPHICS)%,$(_HGRAPHICS)) $(HCOMMON)
 
