@@ -18,7 +18,17 @@ zeq_archive_t::zeq_archive_t(zeq_t* Z, const zeq_path_t& path, const std::string
     
     if (m_isEQG)
     {
-        
+        auto end = m_mainPfs->end();
+        for (auto iter = m_mainPfs->begin(); iter != end; ++iter)
+        {
+            const std::string& name = iter.name();
+            uint32_t len            = name.length();
+            
+            if (len > 4 && name[len - 3] == 'm' && ((name[len - 2] == 'o' && name[len - 1] == 'd') || (name[len - 2] == 'd' && name[len - 1] == 's')))
+            {
+                m_modelList.push_back(ModelListing(name.c_str(), (name[0] == 'i' && name[1] == 't') ? ZEQ_MODEL_ITEM : ZEQ_MODEL_MOB));
+            }
+        }
     }
     else
     {
@@ -154,6 +164,54 @@ zeq_zone_model_t* zeq_archive_t::loadZoneEQG(uint32_t maxTrianglesPerNode, int u
     return nullptr;
 }
 
+zeq_model_proto_t* zeq_archive_t::loadModel(const std::string& name, zeq_model_proto_t* inheritAnimationsFrom)
+{
+    zeq_model_proto_t* proto;
+    
+    if (!m_isEQG)
+        proto = loadModelWLD(name, inheritAnimationsFrom);
+    else
+        proto = loadModelEQG(name);
+    
+    return proto;
+}
+
+zeq_model_proto_t* zeq_archive_t::loadModelWLD(const std::string& name, zeq_model_proto_t* inheritAnimationsFrom)
+{
+    return nullptr;
+}
+
+zeq_model_proto_t* zeq_archive_t::loadModelEQG(const std::string& name)
+{
+    uint32_t length = name.length();
+    
+    if (length < 4)
+        return nullptr;
+    
+    auto end = m_mainPfs->end();
+    
+    for (auto iter = m_mainPfs->begin(); iter != end; ++iter)
+    {
+        if (name.compare(iter.name()) != 0)
+            continue;
+        
+        uint32_t len    = 0;
+        byte* data      = iter.data(len);
+        
+        if (!data)
+            continue;
+        
+        EqgModel model(m_mainPfs, data, len);
+        
+        if (name[length - 3] == 'm' && name[length - 2] == 'd' && name[length - 1] == 's')
+            model.loadMDS();
+        else
+            model.loadCommon();
+    }
+    
+    return nullptr;
+}
+
 /*
 ** API Functions
 */
@@ -247,6 +305,18 @@ zeq_zone_model_t* zeq_archive_load_zone_ex(zeq_archive_t* arch, uint32_t maxTria
     try
     {
         return arch->loadZone(maxTrianglesPerNode, useStaticGeometryForObjects);
+    }
+    catch (...)
+    {
+        return nullptr;
+    }
+}
+
+zeq_model_proto_t* zeq_archive_load_model(zeq_archive_t* arch, const char* name, zeq_model_proto_t* inheritAnimationsFrom)
+{
+    try
+    {
+        return arch->loadModel(name, inheritAnimationsFrom);
     }
     catch (...)
     {

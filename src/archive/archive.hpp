@@ -10,6 +10,7 @@
 #include "file.hpp"
 #include "model_listing.hpp"
 #include "wld_model.hpp"
+#include "eqg_model.hpp"
 #include "zone_model.hpp"
 #include <vector>
 #include <unordered_map>
@@ -47,6 +48,9 @@ private:
 private:
     zeq_zone_model_t* loadZoneWLD(uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects);
     zeq_zone_model_t* loadZoneEQG(uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects);
+
+    zeq_model_proto_t*  loadModelWLD(const std::string& name, zeq_model_proto_t* inheritAnimationsFrom);
+    zeq_model_proto_t*  loadModelEQG(const std::string& name);
     
 public:
     zeq_archive_t(zeq_t* Z, const zeq_path_t& path, const std::string& filename);
@@ -58,7 +62,8 @@ public:
     
     const std::vector<ModelListing>& getModelList() const { return m_modelList; }
     
-    zeq_zone_model_t* loadZone(uint32_t maxTrianglesPerNode = 512, int useStaticGeometryForObjects = 1);
+    zeq_zone_model_t*   loadZone(uint32_t maxTrianglesPerNode = 512, int useStaticGeometryForObjects = 1);
+    zeq_model_proto_t*  loadModel(const std::string& name, zeq_model_proto_t* inheritAnimationsFrom);
 };
 
 #endif//_ZEQ_ARCHIVE_HPP_

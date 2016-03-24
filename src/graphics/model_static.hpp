@@ -7,6 +7,7 @@
 #include "vertex_buffer.hpp"
 #include "transformable.hpp"
 #include "axis_aligned_bounding_box.hpp"
+#include "fog.hpp"
 
 class ModelStatic : public Transformable
 {

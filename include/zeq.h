@@ -102,6 +102,7 @@ ZEQ_API void                zeq_deinit(zeq_t* Z);
 ZEQ_API void                zeq_opengl_context_created(zeq_t* Z);
 ZEQ_API void                zeq_thread_sleep(uint32_t milliseconds);
 ZEQ_API uint64_t            zeq_clock_get_microseconds(void);
+ZEQ_API void                zeq_set_global_background_color(float r, float g, float b, float a);
 
 ZEQ_API void                zeq_set_path_to_eq(zeq_t* Z, const char* path);
 ZEQ_API const char*         zeq_get_path_to_eq(zeq_t* Z);
@@ -126,10 +127,10 @@ ZEQ_API void                zeq_set_vec3(zeq_type_t type, void* object, int fiel
 ZEQ_API void                zeq_set_ptr(zeq_type_t type, void* object, int field, void* value);
 
 /* Shortcut model loaders */
-ZEQ_API zeq_zone_model_t*   zeq_load_zone(zeq_t* Z, const char* shortname);
-ZEQ_API zeq_zone_model_t*   zeq_load_zone_ex(zeq_t* Z, const char* shortname, uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects);
-ZEQ_API zeq_model_proto_t*  zeq_load_mob(zeq_t* Z, uint16_t raceId, uint8_t genderId);
-ZEQ_API zeq_model_proto_t*  zeq_load_item(zeq_t* Z, uint32_t itemId);
+/*ZEQ_API zeq_zone_model_t*   zeq_load_zone(zeq_t* Z, const char* shortname);*/
+/*ZEQ_API zeq_zone_model_t*   zeq_load_zone_ex(zeq_t* Z, const char* shortname, uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects);*/
+/*ZEQ_API zeq_model_proto_t*  zeq_load_mob(zeq_t* Z, uint16_t raceId, uint8_t genderId);*/
+/*ZEQ_API zeq_model_proto_t*  zeq_load_item(zeq_t* Z, uint32_t itemId);*/
 
 /* Timer */
 ZEQ_API zeq_timer_t*        zeq_timer_start(zeq_t* Z, uint32_t periodMilliseconds, zeq_timer_callback_t callback, void* userdata);
@@ -151,21 +152,23 @@ ZEQ_API int                 zeq_archive_get_model_list(zeq_archive_t* archive, z
 ZEQ_API int                 zeq_archive_is_zone(zeq_archive_t* archive);
 ZEQ_API zeq_zone_model_t*   zeq_archive_load_zone(zeq_archive_t* archive);
 ZEQ_API zeq_zone_model_t*   zeq_archive_load_zone_ex(zeq_archive_t* archive, uint32_t maxTrianglesPerNode, int useStaticGeometryForObjects);
-ZEQ_API zeq_model_proto_t*  zeq_archive_load_model(zeq_archive_t* archive, const char* name);
+ZEQ_API zeq_model_proto_t*  zeq_archive_load_model(zeq_archive_t* archive, const char* name, zeq_model_proto_t* inheritAnimationsFrom);
 
 /* Draw Loop */
 ZEQ_API zeq_delta_t         zeq_advance(zeq_t* Z);
 ZEQ_API void                zeq_draw_begin(void);
 ZEQ_API void                zeq_draw_end(void);
-ZEQ_API void                zeq_animate_zone_objects(zeq_zone_model_t* zone, zeq_delta_t delta);
+/*ZEQ_API void                zeq_animate_zone_objects(zeq_zone_model_t* zone, zeq_delta_t delta);
 ZEQ_API void                zeq_animate_all_mobs(zeq_t* Z, zeq_delta_t delta);
 ZEQ_API void                zeq_draw_all_mobs(zeq_t* Z, zeq_camera_t* camera);
 
-ZEQ_API zeq_delta_t         zeq_default_loop_step(zeq_t* Z, zeq_zone_model_t* zone, zeq_camera_t* camera);
+ZEQ_API zeq_delta_t         zeq_default_loop_step(zeq_t* Z, zeq_zone_model_t* zone, zeq_camera_t* camera);*/
 
 /* Camera */
 ZEQ_API zeq_camera_t*       zeq_camera_create(void);
 ZEQ_API void                zeq_camera_destroy(zeq_camera_t* camera);
+
+ZEQ_API void                zeq_camera_set_fog(zeq_camera_t* camera, float r, float g, float b, float density, int useExp2Equation);
 
 enum zeq_camera_field_t
 {
@@ -183,7 +186,10 @@ enum zeq_camera_field_t
 ZEQ_API void                zeq_zone_destroy(zeq_zone_model_t* zone);
 ZEQ_API void                zeq_zone_draw(zeq_zone_model_t* zone, zeq_camera_t* camera);
 
-/* Model */
+/* Model Prototype */
+ZEQ_API void                zeq_prototype_destroy(zeq_model_proto_t* proto);
+
+/* Model Instance */
 ZEQ_API zeq_model_inst_t*   zeq_model_create(zeq_model_proto_t* proto);
 ZEQ_API void                zeq_model_destroy(zeq_model_inst_t* inst);
 

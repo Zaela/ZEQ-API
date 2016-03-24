@@ -8,8 +8,10 @@
 #include "mat4.hpp"
 #include "math.hpp"
 #include "opengl.hpp"
+#include "ref_counter.hpp"
+#include "fog.hpp"
 
-struct zeq_camera_t
+struct zeq_camera_t : public RefCounter
 {
 private:
     Frustum m_frustum;
@@ -22,9 +24,11 @@ private:
     Vec3    m_up;
     Mat4    m_viewMatrix;
     Mat4    m_projectionMatrix;
+    Fog     m_fog;
     
 public:
     zeq_camera_t();
+    virtual ~zeq_camera_t() { }
 
     void recalculateView();
     void recalculatePerspective();
@@ -52,6 +56,12 @@ public:
     void setAspectRatio(float r) { m_aspectRatio = r; }
     void setNearClip(float dist) { m_nearZ = dist; }
     void setFarClip(float dist) { m_farZ = dist; }
+    
+    Fog& getFog() { return m_fog; }
+    
+    inline void applyFog() { m_fog.apply(); }
+    inline void disableFog() { m_fog.disable(); }
+    inline void enableFog() { m_fog.enable(); }
 
     static float get_float(void* object, int field);
     static zeq_vec3_t get_vec3(void* object, int field);

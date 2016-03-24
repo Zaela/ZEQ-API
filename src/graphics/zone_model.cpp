@@ -227,6 +227,7 @@ void zeq_zone_model_t::draw(zeq_camera_t* cam)
 {
     cam->recalculate();
     cam->applyView();
+    cam->applyFog();
     
     Frustum& frustum    = cam->getFrustum();
     uint32_t n          = m_boundingBoxes.size();
@@ -250,7 +251,14 @@ void zeq_zone_model_t::draw(zeq_camera_t* cam)
             continue;
         
         vb->setActiveTexture(lastDiffuseId);
-        vb->setActiveBlend(lastBlend);
+        
+        if (vb->setActiveBlend(lastBlend))
+        {
+            if (lastBlend == ZEQ_BLEND_PARTICLE)
+                Fog::disable();
+            else
+                Fog::enable();
+        }
         
         vb->draw();
     }
@@ -259,13 +267,20 @@ void zeq_zone_model_t::draw(zeq_camera_t* cam)
     
     n = m_staticObjects.boundingBoxes.size();
     
-    for (uint32_t i = 0; i < n; i++)
+    if (n != 0)
     {
-        if (!frustum.contains(m_staticObjects.boundingBoxes[i]))
-            continue;
+        Fog::enable();
         
-        m_staticObjects.placements[i]->draw();
+        for (uint32_t i = 0; i < n; i++)
+        {
+            if (!frustum.contains(m_staticObjects.boundingBoxes[i]))
+                continue;
+            
+            m_staticObjects.placements[i]->draw();
+        }
     }
+    
+    cam->disableFog();
 }
 
 void zeq_zone_model_t::registerWithOpenGL()

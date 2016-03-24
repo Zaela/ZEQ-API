@@ -61,7 +61,14 @@ void ModelStatic::draw()
             continue;
         
         vb->setActiveTexture(lastDiffuseId);
-        vb->setActiveBlend(lastBlend);
+        
+        if (vb->setActiveBlend(lastBlend))
+        {
+            if (lastBlend == ZEQ_BLEND_PARTICLE)
+                Fog::disable();
+            else
+                Fog::enable();
+        }
         
         vb->draw();
     }
@@ -72,7 +79,14 @@ void ModelStatic::draw()
             continue;
         
         vb->setActiveTexture(lastDiffuseId);
-        vb->setActiveBlend(lastBlend);
+        
+        if (vb->setActiveBlend(lastBlend))
+        {
+            if (lastBlend == ZEQ_BLEND_PARTICLE)
+                Fog::disable();
+            else
+                Fog::enable();
+        }
         
         vb->draw();
     }

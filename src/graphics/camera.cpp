@@ -139,7 +139,9 @@ zeq_camera_t* zeq_camera_create()
 {
     try
     {
-        return new zeq_camera_t;
+        zeq_camera_t* cam = new zeq_camera_t;
+        cam->grab();
+        return cam;
     }
     catch (...)
     {
@@ -149,5 +151,10 @@ zeq_camera_t* zeq_camera_create()
 
 void zeq_camera_destroy(zeq_camera_t* cam)
 {
-    delete cam;
+    cam->drop();
+}
+
+void zeq_camera_set_fog(zeq_camera_t* cam, float r, float g, float b, float density, int useExp2Equation)
+{
+    cam->getFog().set(r, g, b, density, useExp2Equation);
 }

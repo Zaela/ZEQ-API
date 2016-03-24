@@ -25,8 +25,17 @@ public:
 
     void setModelMatrix(Mat4& matrix) { m_transformable.setModelMatrix(matrix); }
     
-    void calculateBoundingBox(AABB& box);
-    void draw();
+    inline void calculateBoundingBox(AABB& box)
+    {
+        if (!m_isAnimated)
+            m_static.calculateBoundingBox(box);
+    }
+    
+    inline void draw()
+    {
+        if (!m_isAnimated)
+            m_static.draw();
+    }
 };
 
 #endif//_ZEQ_MODEL_INSTANCE_HPP_

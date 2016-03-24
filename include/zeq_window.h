@@ -217,7 +217,7 @@ struct zeq_input_t
         zeq_mouse_wheel_t   mouseWheel;
         zeq_key_press_t     keyPress;
         zeq_key_press_t     keyRelease;
-        zeq_text_entry_t    text;
+        zeq_text_entry_t    textEntry;
         zeq_window_resize_t windowResize;
     };
 };
@@ -225,10 +225,10 @@ struct zeq_input_t
 /* Provided input handlers */
 typedef struct zeq_zoneviewer_t zeq_zoneview_input_handler_t;
 
-ZEQ_API zeq_zoneviewer_t*   zeq_zoneviewer_create(void);
+ZEQ_API zeq_zoneviewer_t*   zeq_zoneviewer_create(zeq_camera_t* camera);
 ZEQ_API void                zeq_zoneviewer_destroy(zeq_zoneviewer_t* zoneviewer);
 ZEQ_API void                zeq_zoneviewer_handle_input(zeq_zoneviewer_t* zoneviewer, zeq_input_t* input);
-ZEQ_API void                zeq_zoneviewer_update(zeq_zoneviewer_t* zoneviewer, zeq_camera_t* camera, zeq_delta_t delta);
+ZEQ_API void                zeq_zoneviewer_update(zeq_zoneviewer_t* zoneviewer, zeq_delta_t delta);
 
 typedef struct zeq_orbitviewer_t zeq_orbitviewer_t;
 

@@ -6,6 +6,7 @@
 #include "conv_object.hpp"
 #include "conv_material.hpp"
 #include "conv_vertex_buffer.hpp"
+#include "conv_skeleton.hpp"
 #include "pfs.hpp"
 #include "mat4.hpp"
 #include <string>
@@ -28,7 +29,9 @@ private:
     std::vector<ConvVertexBuffer>   m_vertexBuffers;
     std::vector<ConvVertexBuffer>   m_noCollideVertexBuffers;
     std::vector<ConvModel*>         m_headModels;
-//skele, anims
+
+    ConvSkeleton    m_skeleton;
+    //anims
 
     std::unordered_map<std::string, ConvModel*> m_objectModelsByName;
     std::vector<ObjectPlacement>                m_objectPlacementsStatic;

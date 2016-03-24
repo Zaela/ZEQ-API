@@ -1,13 +1,21 @@
 
 #include "zoneviewer.hpp"
 
-zeq_zoneviewer_t::zeq_zoneviewer_t()
-: m_move(0),
+zeq_zoneviewer_t::zeq_zoneviewer_t(zeq_camera_t* cam)
+: m_camera(cam),
+  m_move(0),
   m_turn(0),
   m_mouseLook(false),
-  m_mouseLookMoved(false)
+  m_mouseLookMoved(false),
+  m_farClip(cam->getFarClip())
 {
-    
+    cam->grab();
+}
+
+zeq_zoneviewer_t::~zeq_zoneviewer_t()
+{
+    if (m_camera)
+        m_camera->drop();
 }
 
 void zeq_zoneviewer_t::handleKeyPress(zeq_key_press_t& key)
@@ -51,6 +59,17 @@ void zeq_zoneviewer_t::handleKeyRelease(zeq_key_press_t& key)
         if (m_turn == TURN_RIGHT)
             m_turn = 0;
         break;
+    case ZEQ_KEY_EQUAL:
+        m_farClip += 10.0f;
+        m_camera->setFarClip(m_farClip);
+        break;
+    case ZEQ_KEY_DASH:
+        if (m_farClip > 50.0f)
+        {
+            m_farClip -= 10.0f;
+            m_camera->setFarClip(m_farClip);
+        }
+        break;
     default:
         break;
     }
@@ -92,13 +111,13 @@ void zeq_zoneviewer_t::handleMouseRelease(zeq_mouse_click_t& mouse)
     }
 }
 
-void zeq_zoneviewer_t::update(zeq_camera_t* camera, double delta)
+void zeq_zoneviewer_t::update(double delta)
 {
     if (!m_move && !m_turn && (!m_mouseLook || !m_mouseLookMoved))
         return;
     
-    Vec3& pos   = camera->getPosition();
-    Vec3 target = camera->getTarget() - pos;
+    Vec3& pos   = m_camera->getPosition();
+    Vec3 target = m_camera->getTarget() - pos;
     
     Vec2 relativeRotation = target.horizontalAngle();
     
@@ -140,7 +159,7 @@ void zeq_zoneviewer_t::update(zeq_camera_t* camera, double delta)
     
     if (m_mouseLook && m_turn)
     {
-        Vec3 strafe = target.crossProduct(camera->getUpVector());
+        Vec3 strafe = target.crossProduct(m_camera->getUpVector());
         strafe.normalize();
         strafe *= delta * 100.0f * -m_turn;
         pos -= strafe;
@@ -148,18 +167,18 @@ void zeq_zoneviewer_t::update(zeq_camera_t* camera, double delta)
     
     target += pos;
     
-    camera->setTarget(target);
+    m_camera->setTarget(target);
 }
 
 /*
 ** API functions
 */
 
-zeq_zoneviewer_t* zeq_zoneviewer_create()
+zeq_zoneviewer_t* zeq_zoneviewer_create(zeq_camera_t* cam)
 {
     try
     {
-        return new zeq_zoneviewer_t();
+        return new zeq_zoneviewer_t(cam);
     }
     catch (...)
     {
@@ -196,7 +215,7 @@ void zeq_zoneviewer_handle_input(zeq_zoneviewer_t* zoneviewer, zeq_input_t* inpu
     }
 }
 
-void zeq_zoneviewer_update(zeq_zoneviewer_t* zoneviewer, zeq_camera_t* camera, zeq_delta_t delta)
+void zeq_zoneviewer_update(zeq_zoneviewer_t* zoneviewer, zeq_delta_t delta)
 {
-    zoneviewer->update(camera, delta.seconds);
+    zoneviewer->update(delta.seconds);
 }

@@ -46,15 +46,19 @@ public:
         }
     }
     
-    inline void setActiveBlend(zeq_blend_t& prevBlend)
+    inline bool setActiveBlend(zeq_blend_t& prevBlend)
     {
         zeq_blend_t blend = (zeq_blend_t)m_blendType;
+        
         if (prevBlend != blend)
         {
             deactivateBlend(prevBlend);
             activateBlend(blend);
             prevBlend = blend;
+            return true;
         }
+        
+        return false;
     }
     
     static void activateBlend(zeq_blend_t blend);

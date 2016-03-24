@@ -6,6 +6,7 @@
 #include "path.hpp"
 #include "file.hpp"
 #include "FreeImage.h"
+#include "model_listing.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -56,6 +57,23 @@ private:
 
 private:
     byte* decompressEntry(uint32_t i, uint32_t& len);
+
+public:
+    class Iterator
+    {
+    private:
+        PFS* m_pfs;
+        std::unordered_map<std::string, uint32_t>::iterator m_nameIter;
+    
+    public:
+        Iterator(PFS* pfs, std::unordered_map<std::string, uint32_t>::iterator iter) : m_pfs(pfs), m_nameIter(iter) { }
+        Iterator& operator++() { m_nameIter++; return *this; }
+        bool operator==(const Iterator& o) { return m_nameIter == o.m_nameIter; }
+        bool operator!=(const Iterator& o) { return m_nameIter != o.m_nameIter; }
+        
+        const std::string& name() { return (*m_nameIter).first; }
+        byte* data(uint32_t& len) { return m_pfs->getEntry((*m_nameIter).first, len); }
+    };
     
 public:
     PFS(const std::string& path);
@@ -66,6 +84,9 @@ public:
     bool hasWLD() const;
     bool hasTER() const;
     bool hasZON() const;
+
+    Iterator begin()    { return Iterator(this, m_byName.begin()); }
+    Iterator end()      { return Iterator(this, m_byName.end()); }
 };
 
 #endif//_ZEQ_PFS_HPP_

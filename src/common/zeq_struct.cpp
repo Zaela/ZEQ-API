@@ -265,3 +265,8 @@ void zeq_draw_end()
     glDisable(GL_CULL_FACE);
     glDisable(GL_TEXTURE_2D);
 }
+
+void zeq_set_global_background_color(float r, float g, float b, float a)
+{
+    glClearColor(r, g, b, a);
+}
