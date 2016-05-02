@@ -22,12 +22,11 @@ private:
     ConvVertexBuffer*   m_vertexBuffer;
     
 public:
-    EqgWeightBuffer() : m_vertexBuffer(nullptr) { }
+    EqgWeightBuffer(ConvVertexBuffer& vb) : m_vertexBuffer(&vb) { }
     
     void add(uint32_t vertIndex, uint32_t boneIndex, float weight);
     void sort();
     
-    void setVertexBuffer(ConvVertexBuffer& vb) { m_vertexBuffer = &vb; }
     ConvVertexBuffer* getVertexBuffer() const { return m_vertexBuffer; }
 };
 

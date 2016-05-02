@@ -15,7 +15,7 @@ ConvModel::~ConvModel()
     for (ConvMaterial* mat : m_materials)
     {
         if (mat && mat != nullMat)
-            delete mat;
+            mat->drop();
     }
     
     for (ConvModel* head : m_headModels)
@@ -29,6 +29,13 @@ ConvModel::~ConvModel()
         if (p.second)
             delete p.second;
     }
+}
+
+void ConvModel::addMaterial(ConvMaterial* mat)
+{
+    if (mat)
+        mat->grab();
+    m_materials.push_back(mat);
 }
 
 void ConvModel::initVertexBuffers()
@@ -86,11 +93,6 @@ void ConvModel::takeVertexBuffers(std::vector<ConvVertexBuffer>& src)
 void ConvModel::takeVertexBuffersNoCollide(std::vector<ConvVertexBuffer>& src)
 {
     takeVertexBuffers(src, m_noCollideVertexBuffers);
-}
-
-bool ConvModel::isAnimated() const
-{
-    return false; //fixme
 }
 
 ConvModel* ConvModel::getObjectDefinition(const char* name)

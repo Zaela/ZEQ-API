@@ -16,6 +16,9 @@ void WldModel::readAllMaterials()
     if (frag30s.size() == 0)
         throw 1; //fixme
     
+    if (m_materialIndicesByF30.size() > 0)
+        return;
+    
     // Materials
     uint32_t i = 1; // Zeroth material is the NULL material
     
@@ -127,7 +130,7 @@ void WldModel::readAllMeshes()
     }
 }
 
-void WldModel::readMesh(Frag36* f36, bool isZone)
+void WldModel::readMesh(Frag36* f36, bool isZone, ConvSkeleton* skele)
 {
     WLD* wld        = m_wld;
     uint32_t len    = f36->length();
@@ -192,7 +195,7 @@ void WldModel::readMesh(Frag36* f36, bool isZone)
     std::vector<uint32_t> vert2ba;
     std::function<uint32_t(uint32_t)> triBAs;
     
-    if (boneCount > 0)
+    if (boneCount > 0 && skele)
     {
         WldBoneAssignment* boneAssigns = (WldBoneAssignment*)(data + p);
         p += sizeof(WldBoneAssignment) * boneCount;
@@ -208,12 +211,11 @@ void WldModel::readMesh(Frag36* f36, bool isZone)
             }
         }
         
-        //auto& indexMap = skeleton()->getBoneIndexMap();
+        auto& indexMap = skele->getIndexMap();
         
         triBAs = [&](uint32_t index)
         {
-            //return indexMap[vert2ba[index]];
-            return vert2ba[index];
+            return indexMap[vert2ba[index]];
         };
     }
     
@@ -306,6 +308,9 @@ void WldModel::readMesh(Frag36* f36, bool isZone)
                     v.v = 0;
                 }
                 
+                if (triBAs)
+                    v.boneIndex = triBAs(index);
+                
                 vb->push_back(v);
             }
         }
@@ -386,4 +391,179 @@ void WldModel::readObjectPlacements(WLD* wld)
         
         addObjectPlacement(mat, obj);
     }
+}
+
+void WldModel::readAnimatedModel(Frag11* f11)
+{
+    WLD* wld            = m_wld;
+    PFS* pfs            = getPFS();
+    ConvSkeleton& skele = skeleton();
+    
+    Frag10* f10 = (Frag10*)wld->getFrag(f11->ref);
+    
+    if (!f10 || f10->type() != 0x10 || f10->boneCount() == 0)
+        throw 3; //fixme
+    
+    int boneCount           = f10->boneCount();
+    Frag10Bone* rootBone    = f10->boneList();
+    Frag10Bone* binBone     = rootBone;
+    
+    skele.init((uint32_t)boneCount);
+    
+    // Read and convert bones
+    for (int i = 0; i < boneCount; i++)
+    {
+        Frag13* f13 = (Frag13*)wld->getFrag(binBone->refA);
+        
+        if (!f13 || f13->type() != 0x13)
+            throw 4; //fixme
+        
+        Frag12* f12 = (Frag12*)wld->getFrag(f13->ref);
+        
+        if (!f12 || f12->type() != 0x12)
+            throw 5; //fixme
+        
+        Vec3 pos;
+        Quaternion rot;
+        
+        f12->entry[0].getPosRot(pos, rot);
+        skele.setBone((uint32_t)i, pos, rot);
+        
+        const char* name = wld->getFragName(f13);
+        skele.addBoneNameToIndex(name, (uint32_t)i);
+        
+        if (strstr(name, "_point_track"))
+        {
+            AttachPoint::Type attach = AttachPoint::Type::NONE;
+            const char* p = name + 3;
+            
+            switch (*p)
+            {
+            case 't':
+                attach = AttachPoint::Type::RightHand;
+                break;
+            case 'l':
+                attach = AttachPoint::Type::LeftHand;
+                break;
+            case 'h':
+                if (strstr(p, "head"))
+                    attach = AttachPoint::Type::Camera;
+                break;
+            case 's':
+                if (strstr(p, "shield"))
+                    attach = AttachPoint::Type::Shield;
+                break;
+            }
+            
+            skele.setAttachPointType((uint32_t)i, attach);
+        }
+        
+        binBone = binBone->next();
+    }
+    
+    // Read bone hierarchy
+    binBone = rootBone;
+    for (int i = 0; i < boneCount; i++)
+    {
+        if (binBone->size > 0)
+        {
+            int* index = binBone->indexList();
+            
+            for (int j = 0; j < binBone->size; j++)
+            {
+                skele.addChild((uint32_t)i, (uint32_t)index[j]);
+            }
+        }
+        
+        binBone = binBone->next();
+    }
+    
+    skele.buildIndexMap();
+    
+    // Read animations
+    
+    
+    // VertexBuffers and Head models
+    int modelCount  = 0;
+    int* refs       = f10->refList(modelCount);
+    
+    for (int i = 0; i < modelCount; i++)
+    {
+        Frag2d* f2d = (Frag2d*)wld->getFrag(refs[i]);
+        
+        if (!f2d || f2d->type() != 0x2d)
+            continue;
+        
+        Frag36* f36 = (Frag36*)wld->getFrag(f2d->ref);
+        
+        if (!f36 || f36->type() != 0x36)
+            continue;
+        
+        const char* name = wld->getFragName(f36);
+        printf("%s\n", name);
+        
+        WldModel* model;
+        
+        if (name[3] == 'h' && name[4] == 'e')
+        {
+            model = new WldModel(pfs, wld);
+            addHeadModel(model);
+        }
+        else
+        {
+            model = this;
+        }
+        
+        model->readAllMaterials();
+        model->readMesh(f36, false, &skele);
+    }
+}
+
+void WldModel::readModel(const char* modelId)
+{
+    WLD* wld    = m_wld;
+    Frag14* f14 = nullptr;
+    
+    for (Fragment* frag : wld->getFragsByType(0x14))
+    {
+        const char* name = wld->getFragName(frag->nameRef());
+        if (strcmp(name, modelId) == 0)
+        {
+            f14 = (Frag14*)frag;
+            break;
+        }
+    }
+    
+    if (!f14)
+        throw 1; //fixme
+    
+    // f14 -> f11 -> f10 -> f13 -> f12
+    //                  |-> f2d -> f36
+    // OR
+    // f14 -> f2d -> f36
+    
+    // Is this an animated model?
+    Fragment* frag = wld->getFrag(f14->firstRef());
+    
+    if (!frag)
+        throw 2; //fixme
+    
+    if (frag->type() == 0x11)
+    {
+        readAnimatedModel((Frag11*)frag);
+        return;
+    }
+    else if (frag->type() != 0x2d)
+    {
+        throw 6; //fixme
+    }
+    
+    Frag2d* f2d = (Frag2d*)frag;
+    Frag36* f36 = (Frag36*)wld->getFrag(f2d->ref);
+    
+    if (!f36 || f36->type() != 0x36)
+        throw 7; //fixme
+    
+    readAllMaterials();
+    readMesh(f36);
 }

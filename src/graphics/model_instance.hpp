@@ -5,7 +5,9 @@
 #include "define.hpp"
 #include "model_prototype.hpp"
 #include "model_static.hpp"
+#include "model_animated.hpp"
 #include "transformable.hpp"
+#include "camera.hpp"
 
 struct zeq_model_inst_t
 {
@@ -17,6 +19,7 @@ private:
     {
         Transformable   m_transformable;
         ModelStatic     m_static;
+        ModelAnimated   m_animated;
     };
     
 public:
@@ -35,6 +38,8 @@ public:
     {
         if (!m_isAnimated)
             m_static.draw();
+        else
+            m_animated.draw();
     }
 };
 

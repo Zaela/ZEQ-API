@@ -17,9 +17,9 @@ zeq_blend_t WldMaterial::getBlendValue(uint32_t visibility)
     case 0x80000013:
         return ZEQ_BLEND_MASKED;
     case 0x80000005:
+    case 0x80000009:
     case 0x8000000a:
         return ZEQ_BLEND_ADDITIVE;
-    case 0x80000009:
     case 0x8000000b:
     case 0x80000017:
         return ZEQ_BLEND_PARTICLE;

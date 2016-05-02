@@ -45,11 +45,11 @@ DIRARCHIVE= src/archive/
 BARCHIVE= build/$(BUILDTYPE)/archive/
 _OARCHIVE= archive.o file.o pfs.o wld.o conv_material.o conv_model.o \
  wld_model.o wld_material.o conv_vertex_buffer.o eqg_model.o eqg_weight_buffer.o \
- conv_skeleton.o eqg_material.o
+ conv_skeleton.o eqg_material.o eqg_ani.o eqg_common.o
 _HARCHIVE= archive.hpp file.hpp pfs.hpp wld.hpp conv_material.hpp conv_model.hpp \
  wld_model.hpp wld_material.hpp fragments.hpp model_listing.hpp \
  conv_vertex_buffer.hpp eqg_model.hpp eqg_weight_buffer.hpp conv_skeleton.hpp \
- eqg_material.hpp
+ eqg_material.hpp eqg_ani.hpp eqg_common.hpp
 OARCHIVE= $(patsubst %,$(BARCHIVE)%,$(_OARCHIVE))
 HARCHIVE= $(patsubst %,$(DIRARCHIVE)%,$(_HARCHIVE)) $(HCOMMON)
 
@@ -62,10 +62,11 @@ DIRGRAPHICS= src/graphics/
 BGRAPHICS= build/$(BUILDTYPE)/graphics/
 _OGRAPHICS= vertex_buffer.o opengl.o material.o texture.o anim_texture.o \
   zone_model.o camera.o model_prototype.o model_instance.o model_static.o \
- transformable.o fog.o
+ transformable.o fog.o model_animated.o skeleton.o
 _HGRAPHICS= vertex.hpp vertex_buffer.hpp opengl.hpp material.hpp texture.hpp \
  anim_texture.hpp zone_model.hpp camera.hpp model_prototype.hpp \
- model_instance.hpp model_static.hpp transformable.hpp fog.hpp
+ model_instance.hpp model_static.hpp transformable.hpp fog.hpp model_animated.hpp \
+ skeleton.hpp
 OGRAPHICS= $(patsubst %,$(BGRAPHICS)%,$(_OGRAPHICS))
 HGRAPHICS= $(patsubst %,$(DIRGRAPHICS)%,$(_HGRAPHICS)) $(HCOMMON)
 
@@ -160,9 +161,9 @@ $(SOPATH): $(OCOMMON) $(OARCHIVE) $(OGRAPHICS)
 	$(E) "Linking $@"
 	$(Q)$(CXX) -o $@ $^ $(LSTATIC) $(LPATH) $(LDYNAMIC) $(LFLAGS)
 
-$(APATH): $(OCOMMON) $(OARCHIVE)
+$(APATH): $(OCOMMON) $(OARCHIVE) $(OGRAPHICS)
 	$(E) "Packing $@"
-	$(Q)$(AR) $(APATH) $(OCOMMON) $(OARCHIVE)
+	$(Q)$(AR) $(APATH) $(OCOMMON) $(OARCHIVE) $(OGRAPHICS)
 
 $(SOPATHWINDOW): $(OWINDOW) $(SOPATH)
 	$(E) "Linking $@"

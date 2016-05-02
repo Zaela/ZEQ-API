@@ -3,9 +3,10 @@
 #define _ZEQ_CONV_OBJECT_HPP_
 
 #include "define.hpp"
+#include "ref_counter.hpp"
 #include <string>
 
-class ConvObject
+class ConvObject : public RefCounter
 {
 private:
     std::string m_name;

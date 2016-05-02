@@ -232,9 +232,9 @@ ZEQ_API void                zeq_zoneviewer_update(zeq_zoneviewer_t* zoneviewer, 
 
 typedef struct zeq_orbitviewer_t zeq_orbitviewer_t;
 
-ZEQ_API zeq_orbitviewer_t*  zeq_orbitviewer_create(void);
+ZEQ_API zeq_orbitviewer_t*  zeq_orbitviewer_create(zeq_camera_t* camera);
 ZEQ_API void                zeq_orbitviewer_destroy(zeq_orbitviewer_t* orbitviewer);
 ZEQ_API void                zeq_orbitviewer_handle_input(zeq_orbitviewer_t* orbitviewer, zeq_input_t* input);
-ZEQ_API void                zeq_orbitviewer_update(zeq_orbitviewer_t* orbitviewer, zeq_camera_t* camera, zeq_delta_t delta);
+ZEQ_API void                zeq_orbitviewer_update(zeq_orbitviewer_t* orbitviewer, zeq_delta_t delta);
 
-#endif//_ZEQ_WINDOW_H_
+#endif/*_ZEQ_WINDOW_H_*/

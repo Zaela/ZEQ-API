@@ -193,4 +193,6 @@ ZEQ_API void                zeq_prototype_destroy(zeq_model_proto_t* proto);
 ZEQ_API zeq_model_inst_t*   zeq_model_create(zeq_model_proto_t* proto);
 ZEQ_API void                zeq_model_destroy(zeq_model_inst_t* inst);
 
+ZEQ_API void                zeq_model_draw(zeq_model_inst_t* inst, zeq_camera_t* camera);
+
 #endif/*_ZEQ_H_*/

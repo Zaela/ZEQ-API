@@ -78,7 +78,8 @@ private:
     void handleF03(Frag03* f03, Frag30* f30, ConvMaterial* mat = nullptr);
     void handleF04Animated(Frag04* f04s, Frag30* f30);
     void readMaterials(Frag14* f14);
-    void readMesh(Frag36* f36, bool isZone = false);
+    void readMesh(Frag36* f36, bool isZone = false, ConvSkeleton* skele = nullptr);
+    void readAnimatedModel(Frag11* f11);
 
 public:
     WldModel(PFS* pfs, WLD* wld);
@@ -87,6 +88,7 @@ public:
     void readAllMeshes();
     void readObjectDefinitions();
     void readObjectPlacements(WLD* placementWld);
+    void readModel(const char* modelId);
 };
 
 #endif//_ZEQ_WLD_MODEL_HPP_

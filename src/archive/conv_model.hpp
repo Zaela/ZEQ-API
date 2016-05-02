@@ -30,7 +30,7 @@ private:
     std::vector<ConvVertexBuffer>   m_noCollideVertexBuffers;
     std::vector<ConvModel*>         m_headModels;
 
-    ConvSkeleton    m_skeleton;
+    ConvSkeleton m_skeleton;
     //anims
 
     std::unordered_map<std::string, ConvModel*> m_objectModelsByName;
@@ -46,7 +46,7 @@ public:
     
     PFS* getPFS() const { return m_pfs; }
     
-    void addMaterial(ConvMaterial* mat) { m_materials.push_back(mat); }
+    void addMaterial(ConvMaterial* mat);
     ConvMaterial* getMaterial(uint32_t i) { return m_materials[i]; }
     std::vector<ConvMaterial*>& getAllMaterials() { return m_materials; }
     uint32_t getMaterialCount() const { return m_materials.size(); }
@@ -66,7 +66,7 @@ public:
     void takeVertexBuffers(std::vector<ConvVertexBuffer>& vbs);
     void takeVertexBuffersNoCollide(std::vector<ConvVertexBuffer>& vbs);
     
-    bool isAnimated() const;
+    bool isAnimated() const { return m_skeleton.hasBones(); }
     
     void addObjectDefinition(const char* name, ConvModel* obj);
     ConvModel* getObjectDefinition(const char* name);
@@ -75,6 +75,10 @@ public:
     
     std::vector<ObjectPlacement>& getStaticObjectPlacements() { return m_objectPlacementsStatic; }
     std::vector<ObjectPlacement>& getAnimatedObjectPlacements() { return m_objectPlacementsAnimated; }
+    
+    ConvSkeleton& skeleton() { return m_skeleton; }
+    
+    void addHeadModel(ConvModel* model) { m_headModels.push_back(model); }
 };
 
 #endif//_ZEQ_CONV_MODEL_HPP_

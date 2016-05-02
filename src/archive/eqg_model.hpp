@@ -7,12 +7,14 @@
 #include "pfs.hpp"
 #include "eqg_material.hpp"
 #include "eqg_weight_buffer.hpp"
+#include "eqg_common.hpp"
+#include "eqg_ani.hpp"
 #include "vec3.hpp"
 #include <vector>
 #include <string>
 #include <unordered_map>
 
-class EqgModel : public ConvModel
+class EqgModel : public ConvModel, public EqgCommon
 {
 private:
 #pragma pack(1)
@@ -26,8 +28,15 @@ private:
     
     struct EqgProperty
     {
-        uint32_t typeNameIndex; // Index of the property's type name in the file's string block
-        uint32_t valueType;     // Type of the property's value: 0 = float, 2 = string index int, 3 = ARGB color value int
+        enum Type : uint32_t
+        {
+            Float = 0,
+            Index = 2,
+            Color = 3
+        };
+        
+        uint32_t    typeNameIndex; // Index of the property's type name in the file's string block
+        Type        valueType;     // Type of the property's value: 0 = float, 2 = string index int, 3 = ARGB color value int
         union {
             uint32_t    asIndex;
             float       asFloat;
@@ -37,17 +46,17 @@ private:
     
     struct EqgVertex
     {
-        float x, y, z;  // Position
-        float i, j, k;  // Normal
-        float u, v;     // Texture coordinates
+        Vec3 pos;
+        Vec3 normal;
+        float u, v;
     };
     
     struct EqgVertexV3
     {
-        float       x, y, z;    // Position
-        float       i, j, k;    // Normal
+        Vec3        pos;
+        Vec3        normal;
         uint8_t     r, g, b, a;
-        float       u, v;       // Texture coordinates
+        float       u, v;
         float       unk_f[2];
     };
     
@@ -58,11 +67,6 @@ private:
         uint32_t    flag;
     };
     
-    struct EqgQuat
-    {
-        float x, y, z, w;
-    };
-    
     struct EqgBone
     {
         uint32_t    nameIndex;
@@ -70,7 +74,7 @@ private:
         uint32_t    flag;
         uint32_t    childBoneIndex;
         Vec3        pos;
-        EqgQuat     rot;
+        Quaternion  rot;
         Vec3        scale;
     };
     
@@ -103,54 +107,49 @@ private:
         uint32_t    nameIndex;
         uint32_t    vertexCount;
         uint32_t    triangleCount;
-        uint32_t    boneAssignmentCount;
+        uint32_t    boneAssignmentCount;    // always equal to vertexCount
+    };
+    
+    struct MdsHeadTemp
+    {
+        uint32_t    headNumber;
+        EqgModel*   model;
     };
 
 private:
-    typedef void (*PropertyHandler)(EqgMaterial* mat, EqgProperty& prop, EqgModel* model);
+    typedef void (*PropertyHandler)(EqgMaterial* mat, EqgProperty* prop, EqgModel* model);
     std::unordered_map<std::string, PropertyHandler>    m_propertyHandlers;
 
     std::vector<EqgWeightBuffer> m_weightBuffers;
     std::vector<EqgWeightBuffer> m_weightBuffersNoCollide;
 
-    byte*       m_data;
-    uint32_t    m_len;
-    uint32_t    m_version;
-    uint32_t    m_stringBlockLen;
-    const char* m_stringBlock;
+    bool            m_ownsData;
+    EqgTriangle*    m_triangles;
 
 private:
-    void setVersion(uint32_t ver) { m_version = ver; }
-    void setStringBlockLength(uint32_t len) { m_stringBlockLen = len; }
-    void setStringBlock(const char* strings) { m_stringBlock = strings; }
+    AttachPoint::Type getAttachPointType(const std::string& boneName);
     
-    inline void checkLength(uint32_t p)
-    {
-        if (p > m_len)
-            throw 1; //fixme
-    }
+    uint32_t extractMaterials(uint32_t p, uint32_t count);
+    uint32_t extractBones(uint32_t p, uint32_t count);
+    uint32_t extractVertexBuffers(uint32_t p, uint32_t vertCount, uint32_t triCount, bool isZone = false);
+    uint32_t extractBoneAssignments(uint32_t p, uint32_t count, uint32_t triCount, std::unordered_map<uint32_t, uint32_t>& indexMap);
+    void     extractAnimations();
     
-    uint32_t extractStrings(uint32_t p);
-    uint32_t extractMaterials(uint32_t p);
+    EqgModel* createHeadModel();
     
-    void readProperty(EqgMaterial* mat, EqgProperty& prop);
+    void readProperty(EqgMaterial* mat, EqgProperty* prop);
     
     // Property handlers
-    static void handleDiffuse(EqgMaterial* mat, EqgProperty& prop, EqgModel* model);
+    static void handleDiffuse(EqgMaterial* mat, EqgProperty* prop, EqgModel* model);
     
 public:
-    EqgModel(PFS* pfs, byte* data, uint32_t len);
+    EqgModel(PFS* pfs, byte* data, uint32_t len, bool ownsData = true);
+    virtual ~EqgModel();
 
     void initWeightBuffers();
 
     void loadCommon();
     void loadMDS();
-
-    uint32_t version() const { return m_version; }
-    uint32_t stringsLength() const { return m_stringBlockLen; }
-    const char* strings() { return m_stringBlock; }
-    
-    const char* getString(uint32_t index);
 };
 
 #endif//_ZEQ_EQG_MODEL_HPP_

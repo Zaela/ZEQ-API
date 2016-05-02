@@ -3,6 +3,8 @@
 #define _ZEQ_FRAGMENTS_HPP_
 
 #include "define.hpp"
+#include "vec3.hpp"
+#include "quaternion.hpp"
 
 struct Fragment
 {
@@ -117,6 +119,26 @@ struct Frag12Entry
 {
     int16_t rotW, rotX, rotY, rotZ;
     int16_t shiftX, shiftY, shiftZ, shiftDenom;
+    
+    void getPosRot(Vec3& pos, Quaternion& rot)
+    {
+        if (shiftDenom != 0)
+        {
+            float denom = (float)shiftDenom;
+            
+            pos.x = (float)shiftX / denom;
+            pos.y = (float)shiftY / denom;
+            pos.z = (float)shiftZ / denom;
+        }
+        
+        if (rotW != 0)
+        {
+            rot.x = -((float)rotX) / 16384.0f;
+            rot.y = -((float)rotY) / 16384.0f;
+            rot.z = -((float)rotZ) / 16384.0f;
+            rot.w =  ((float)rotW) / 16384.0f;
+        }
+    }
 };
 
 struct Frag12 : public Fragment
@@ -130,7 +152,7 @@ struct Frag13 : public Fragment
 {
     int         ref;
     uint32_t    flag;
-    uint32_t    param;
+    uint32_t    millisecondsBetweenKeyframes;
 };
 
 struct Frag14 : public Fragment
