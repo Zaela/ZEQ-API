@@ -12,6 +12,54 @@ zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, ze
     addVertexBuffers(model.getVertexBuffersNoCollide(), m_vertexBuffersNoCollide);
     
     m_skeleton.init(model.skeleton());
+    
+    if (isEqg())
+    {
+        
+    }
+    else
+    {
+        for (ConvModel* head : model.heads())
+        {
+            SimpleHead sh;
+            
+            std::vector<ConvVertexBuffer> vbs;
+            
+            for (ConvVertexBuffer& vb : head->getVertexBuffers())
+            {
+                if (!vb.empty())
+                    vbs.push_back(std::move(vb));
+            }
+            
+            for (ConvVertexBuffer& vb : head->getVertexBuffersNoCollide())
+            {
+                if (!vb.empty())
+                    vbs.push_back(std::move(vb));
+            }
+            
+            sh.count = vbs.size();
+            
+            if (sh.count == 0)
+                continue;
+            
+            if (sh.count == 1)
+            {
+                sh.vbSingle = VertexBuffer::create(vbs[0]);
+            }
+            else
+            {
+                sh.vbArray = new VertexBuffer*[sh.count];
+                uint32_t i = 0;
+                
+                for (ConvVertexBuffer& cvb : vbs)
+                {
+                    sh.vbArray[i++] = VertexBuffer::create(cvb);
+                }
+            }
+            
+            m_simpleHeads.push_back(sh);
+        }
+    }
 }
 
 zeq_model_proto_t::~zeq_model_proto_t()
@@ -44,16 +92,38 @@ void zeq_model_proto_t::addVertexBuffers(std::vector<ConvVertexBuffer>& src, std
 
 void zeq_model_proto_t::registerWithOpenGL()
 {
-    bool animated = isAnimated();
+    bool nonAnimated = !isAnimated();
     
     for (VertexBuffer* vb : m_vertexBuffers)
     {
-        vb->registerWithOpenGL(!animated, !animated);
+        vb->registerWithOpenGL(nonAnimated, nonAnimated);
     }
     
     for (VertexBuffer* vb : m_vertexBuffersNoCollide)
     {
-        vb->registerWithOpenGL(!animated, !animated);
+        vb->registerWithOpenGL(nonAnimated, nonAnimated);
+    }
+    
+    if (isEqg())
+    {
+        
+    }
+    else
+    {
+        for (SimpleHead& head : m_simpleHeads)
+        {
+            if (head.count == 1)
+            {
+                head.vbSingle->registerWithOpenGL(nonAnimated, nonAnimated);
+            }
+            else
+            {
+                for (uint32_t i = 0; i < head.count; i++)
+                {
+                    head.vbArray[i]->registerWithOpenGL(nonAnimated, nonAnimated);
+                }
+            }
+        }
     }
     
     m_registeredWithOpenGL = true;

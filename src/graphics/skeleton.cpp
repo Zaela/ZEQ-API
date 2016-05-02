@@ -15,7 +15,7 @@ Skeleton::Skeleton(const Skeleton& copy)
     if (m_boneCount == 0)
         return;
     
-    m_boneArray = new Bone[m_boneCount];
+    m_boneArray = new Bone[m_boneCount]; //fixme: should not be copied? ref count instead
     memcpy(m_boneArray, copy.m_boneArray, sizeof(Bone) * m_boneCount);
 }
 
@@ -32,14 +32,13 @@ void Skeleton::init(ConvSkeleton& skele)
     
     uint32_t count  = skele.getBoneCount();
     Bone* bones     = new Bone[count];
-    Bone* cur       = bones;
     
     ConvSkeleton::Bone* srcArray = skele.getBoneArray();
     
     std::function<void(uint32_t, Bone*)> recurse;
-    recurse = [&cur, srcArray, &recurse](uint32_t index, Bone* parent)
+    recurse = [bones, srcArray, &recurse](uint32_t index, Bone* parent)
     {
-        Bone* dst               = cur++;
+        Bone* dst               = &bones[index];
         ConvSkeleton::Bone& src = srcArray[index];
         
         dst->hasAnimFrames = false;

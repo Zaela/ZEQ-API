@@ -38,8 +38,12 @@ public:
     VertexBuffer(const VertexBuffer& vb)    = delete;
 
     static VertexBuffer* create(ConvVertexBuffer& cVB);
+    static VertexBuffer* copy(const VertexBuffer& vb);
     static void destroy(VertexBuffer* vb); // Valgrind does not like operator delete overload for this class...
     virtual ~VertexBuffer();
+
+    uint32_t count() const { return m_count; }
+    Vertex* vertices() { return m_vertices; }
 
     void draw();
     void registerWithOpenGL(bool useVBO = false, bool isDynamic = false);

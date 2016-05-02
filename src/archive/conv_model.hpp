@@ -77,6 +77,7 @@ public:
     std::vector<ObjectPlacement>& getAnimatedObjectPlacements() { return m_objectPlacementsAnimated; }
     
     ConvSkeleton& skeleton() { return m_skeleton; }
+    std::vector<ConvModel*>& heads() { return m_headModels; }
     
     void addHeadModel(ConvModel* model) { m_headModels.push_back(model); }
 };

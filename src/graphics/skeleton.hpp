@@ -40,6 +40,8 @@ public:
     void init(ConvSkeleton& skele);
 
     bool hasBones() const { return m_boneArray != nullptr; }
+    
+    Bone* bones() { return m_boneArray; }
 };
 
 #endif//_ZEQ_SKELETON_HPP_

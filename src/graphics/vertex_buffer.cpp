@@ -18,6 +18,23 @@ VertexBuffer* VertexBuffer::create(ConvVertexBuffer& cVB)
     return vb;
 }
 
+VertexBuffer* VertexBuffer::copy(const VertexBuffer& src)
+{
+    size_t vlen = src.m_count * sizeof(Vertex);
+    size_t len  = sizeof(VertexBuffer) - sizeof(Vertex) + vlen;
+    
+    VertexBuffer* vb = (VertexBuffer*)(new byte[len]);
+    
+    new (vb) zeq_material_t(src);
+    
+    vb->m_count = src.m_count;
+    vb->m_vboId = 0;
+    
+    memcpy(vb->m_vertices, src.m_vertices, vlen);
+    
+    return vb;
+}
+
 VertexBuffer::~VertexBuffer()
 {
     if (m_vboId)

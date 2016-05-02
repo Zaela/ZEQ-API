@@ -11,7 +11,7 @@
 
 struct zeq_model_proto_t : public RefCounter
 {
-private:
+public:
     struct WeightedHead
     {
         uint32_t count;
@@ -41,6 +41,8 @@ private:
     std::vector<VertexBuffer*>  m_vertexBuffers;
     std::vector<VertexBuffer*>  m_vertexBuffersNoCollide;
     Skeleton                    m_skeleton;
+    std::vector<SimpleHead>     m_simpleHeads;
+    std::vector<WeightedHead>   m_weightedHeads;
 
     bool m_registeredWithOpenGL;
 
@@ -65,6 +67,7 @@ public:
     zeq_model_inst_t* createInstance();
 
     BaseTransform getBaseTransform() const { return m_baseTransform; }
+    bool isEqg() const { return m_baseTransform == Eqg; }
 
     std::vector<VertexBuffer*>& getVertexBuffers() { return m_vertexBuffers; }
     std::vector<VertexBuffer*>& getVertexBuffersNoCollide() { return m_vertexBuffersNoCollide; }
@@ -78,6 +81,7 @@ public:
     }
     
     Skeleton& skeleton() { return m_skeleton; }
+    std::vector<SimpleHead>& getSimpleHeads() { return m_simpleHeads; }
 };
 
 #endif//_ZEQ_MODEL_PROTOTYPE_HPP_
