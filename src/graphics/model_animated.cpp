@@ -52,6 +52,8 @@ ModelAnimated::ModelAnimated(zeq_model_proto_t* proto)
         
         assumeRagdollPosition();
     }
+    
+    m_animMatrices = new Mat4[m_skeleton.boneCount()];
 }
 
 ModelAnimated::~ModelAnimated()

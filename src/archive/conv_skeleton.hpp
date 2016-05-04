@@ -45,6 +45,8 @@ public:
     void buildIndexMap();
     std::unordered_map<uint32_t, uint32_t>& getIndexMap() { return m_indexMap; }
     
+    bool getIndexByName(const char* name, uint32_t& out);
+    
     bool hasBones() const { return m_boneArray != nullptr; }
     uint32_t getBoneCount() const { return m_boneCount; }
     Bone* getBoneArray() { return m_boneArray; }

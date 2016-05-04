@@ -3,25 +3,23 @@
 
 Skeleton::Skeleton()
 : m_boneCount(0),
-  m_boneArray(nullptr)
+  m_boneArray(nullptr),
+  m_isCopy(false)
 {
     
 }
 
 Skeleton::Skeleton(const Skeleton& copy)
 : m_boneCount(copy.m_boneCount),
-  m_boneArray(nullptr)
+  m_boneArray(copy.m_boneArray),
+  m_isCopy(true)
 {
-    if (m_boneCount == 0)
-        return;
-    
-    m_boneArray = new Bone[m_boneCount]; //fixme: should not be copied? ref count instead
-    memcpy(m_boneArray, copy.m_boneArray, sizeof(Bone) * m_boneCount);
+
 }
 
 Skeleton::~Skeleton()
 {
-    if (m_boneArray)
+    if (!m_isCopy && m_boneArray)
         delete[] m_boneArray;
 }
 

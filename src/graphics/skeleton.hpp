@@ -31,6 +31,7 @@ public:
 private:
     uint32_t    m_boneCount;
     Bone*       m_boneArray;
+    bool        m_isCopy;
     
 public:
     Skeleton();
@@ -41,6 +42,7 @@ public:
 
     bool hasBones() const { return m_boneArray != nullptr; }
     
+    uint32_t boneCount() const { return m_boneCount; }
     Bone* bones() { return m_boneArray; }
 };
 

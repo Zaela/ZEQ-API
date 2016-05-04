@@ -75,11 +75,14 @@ private:
 #pragma pack()
 
 private:
+    void handleF30(Frag30* f30);
     void handleF03(Frag03* f03, Frag30* f30, ConvMaterial* mat = nullptr);
     void handleF04Animated(Frag04* f04s, Frag30* f30);
-    void readMaterials(Frag14* f14);
+    void readMaterials(Frag36* f36);
     void readMesh(Frag36* f36, bool isZone = false, ConvSkeleton* skele = nullptr);
     void readAnimatedModel(Frag11* f11);
+
+    static int getAnimId(const char* code);
 
 public:
     WldModel(PFS* pfs, WLD* wld);

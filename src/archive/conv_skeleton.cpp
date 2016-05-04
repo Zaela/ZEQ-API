@@ -62,3 +62,12 @@ void ConvSkeleton::buildIndexMap()
     
     recurse(0);
 }
+
+bool ConvSkeleton::getIndexByName(const char* name, uint32_t& out)
+{
+    if (!m_indicesByBoneName.count(name))
+        return false;
+    
+    out = m_indicesByBoneName[name];
+    return true;
+}

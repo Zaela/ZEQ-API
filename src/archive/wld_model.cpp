@@ -36,7 +36,8 @@ void WldModel::readAllMaterials()
     for (Fragment* frag : frag30s)
     {
         Frag30* f30 = (Frag30*)frag;
-        Frag03* f03 = nullptr;
+        handleF30(f30);
+        /*Frag03* f03 = nullptr;
         
         if (f30->ref > 0)
         {
@@ -60,28 +61,67 @@ void WldModel::readAllMaterials()
             f03 = (Frag03*)wld->getFrag(f30->ref);
         }
         
-        handleF03(f03, f30);
+        handleF03(f03, f30);*/
     }
 }
 
-void WldModel::readMaterials(Frag14* f14)
+void WldModel::readMaterials(Frag36* f36)
 {
-    /*WLD* wld = m_wld;
-    // f14 -> f11 -> f10 -> f2d -> f36 -> f31 -> f30
+    WLD* wld = m_wld;
     
-    Frag2d* f2d;
-    Frag11* f11 = (Frag11*)wld->getFrag(f14->firstRef());
+    // f36 -> f31 -> f30
     
-    if (!f11) return;
+    Frag31* f31 = (Frag31*)wld->getFrag(f36->materialListRef);
     
-    if (f11->type() != 0x11)
+    if (!f31) throw 1; //fixme
+    
+    for (uint32_t i = 0; i < f31->refCount; i++)
     {
-        f2d = (Frag2d*)f11;
+        Frag30* f30 = (Frag30*)wld->getFrag(f31->refList[i]);
+        addMaterial(new WldMaterial(wld->getFragName(f30), f30->visibilityFlag));
+        m_materialIndicesByF30[f30] = i + 1;
+    }
+    
+    initVertexBuffers();
+    
+    for (uint32_t i = 0; i < f31->refCount; i++)
+    {
+        Frag30* f30 = (Frag30*)wld->getFrag(f31->refList[i]);
+        handleF30(f30);
+    }
+}
+
+void WldModel::handleF30(Frag30* f30)
+{
+    WLD* wld    = m_wld;
+    Frag03* f03 = nullptr;
+        
+    if (f30->ref > 0)
+    {
+        Frag05* f05 = (Frag05*)wld->getFrag(f30->ref);
+        if (!f05)
+            return;
+        
+        Frag04* f04 = (Frag04*)wld->getFrag(f05->ref);
+        if (!f04)
+            return;
+        
+        if (!f04->isAnimated())
+        {
+            f03 = (Frag03*)wld->getFrag(f04->ref);
+        }
+        else
+        {
+            handleF04Animated(f04, f30);
+            return;
+        }
     }
     else
     {
-        Frag10* f10 = (Frag10*)wld->getFrag(f11->ref);
-    }*/
+        f03 = (Frag03*)wld->getFrag(f30->ref);
+    }
+    
+    handleF03(f03, f30);
 }
 
 void WldModel::handleF03(Frag03* f03, Frag30* f30, ConvMaterial* mat)
@@ -393,6 +433,22 @@ void WldModel::readObjectPlacements(WLD* wld)
     }
 }
 
+int WldModel::getAnimId(const char* code)
+{
+    int n = strtol(code + 1, nullptr, 10);
+    
+    switch (*code)
+    {
+    case 'c':
+        break;
+    default:
+        n += (int)*code;
+        break;
+    }
+    
+    return n;
+}
+
 void WldModel::readAnimatedModel(Frag11* f11)
 {
     WLD* wld            = m_wld;
@@ -481,7 +537,56 @@ void WldModel::readAnimatedModel(Frag11* f11)
     skele.buildIndexMap();
     
     // Read animations
+    struct Frag12PlusBoneIndex
+    {
+        Frag12*     f12;
+        uint32_t    boneIndex;
+    };
     
+    std::unordered_map<int, std::vector<Frag12PlusBoneIndex>> animsById;
+    
+    for (Fragment* frag : wld->getFragsByType(0x13))
+    {
+        Frag13* f13 = (Frag13*)frag;
+        
+        uint32_t index;
+        const char* name = wld->getFragName(frag);
+        
+        if (!skele.getIndexByName(name + 3, index))
+            continue;
+        
+        int animId  = getAnimId(name);
+        Frag12* f12 = (Frag12*)wld->getFrag(f13->ref);
+        
+        if (!f12 || f12->type() != 0x12)
+            continue;
+        
+        if (!animsById.count(animId))
+            printf("anim %i\n", animId);
+        
+        Frag12PlusBoneIndex fbi;
+        
+        fbi.f12         = f12;
+        fbi.boneIndex   = index;
+        
+        animsById[animId].push_back(fbi);
+    }
+    
+    // Convert anims
+    for (auto& p : animsById)
+    {
+        uint32_t lastFrame = 0;
+        
+        for (Frag12PlusBoneIndex& fbi : p.second)
+        {
+            Frag12* f12 = fbi.f12;
+            
+            if (f12->count > lastFrame)
+                lastFrame = f12->count;
+        }
+        
+        //addAnimation(p.first, anim);
+    }
     
     // VertexBuffers and Head models
     int modelCount  = 0;
@@ -514,7 +619,8 @@ void WldModel::readAnimatedModel(Frag11* f11)
             model = this;
         }
         
-        model->readAllMaterials();
+        //model->readAllMaterials();
+        model->readMaterials(f36);
         model->readMesh(f36, false, &skele);
     }
 }
@@ -565,5 +671,6 @@ void WldModel::readModel(const char* modelId)
         throw 7; //fixme
     
     readAllMaterials();
+    //readMaterials(f36);
     readMesh(f36);
 }

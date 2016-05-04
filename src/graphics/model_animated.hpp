@@ -49,6 +49,7 @@ private:
 private:
     bool        m_isEqg;
     Skeleton    m_skeleton;
+    Mat4*       m_animMatrices;
 
     union
     {

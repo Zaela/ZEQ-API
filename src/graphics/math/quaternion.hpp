@@ -14,6 +14,11 @@ struct Quaternion
     
     Quaternion(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) { }
     
+    bool operator!=(const Quaternion& o)
+    {
+        return x != o.x || y != o.y || z != o.z || w != o.w;
+    }
+    
     void getMatrixTransposed(Mat4& m) const
     {
         m[ 0] = 1.0f - 2.0f*y*y - 2.0f*z*z;
