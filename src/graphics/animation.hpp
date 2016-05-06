@@ -66,6 +66,7 @@ public:
     ~AnimationSet();
 
     void addAnimation(int animId, Animation* anim);
+    void inherit(AnimationSet& o);
 
     Animation* getAnimation(int animId);
 };

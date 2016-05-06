@@ -2,7 +2,7 @@
 #include "model_prototype.hpp"
 #include "model_instance.hpp"
 
-zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, zeq_model_proto_t::BaseTransform baseTransform)
+zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, zeq_model_proto_t* inheritAnimsFrom, zeq_model_proto_t::BaseTransform baseTransform)
 : m_modelType(type),
   m_baseTransform(baseTransform),
   m_animations(std::move(model.getAnimationSet())),
@@ -13,6 +13,9 @@ zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, ze
     addVertexBuffers(model.getVertexBuffersNoCollide(), m_vertexBuffersNoCollide);
     
     m_skeleton.init(model.skeleton());
+    
+    if (inheritAnimsFrom)
+        m_animations.inherit(inheritAnimsFrom->animations());
     
     if (isEqg())
     {

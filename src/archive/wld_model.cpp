@@ -410,7 +410,7 @@ void WldModel::readObjectPlacements(WLD* wld)
 
 int WldModel::getAnimId(const char* code)
 {
-    int n = strtol(code + 1, nullptr, 10);
+    int n = ::strtol(code + 1, nullptr, 10);
     
     switch (*code)
     {
@@ -582,6 +582,14 @@ void WldModel::readAnimatedModel(Frag11* f11)
     int modelCount  = 0;
     int* refs       = f10->refList(modelCount);
     
+    struct HeadId
+    {
+        uint32_t    id;
+        WldModel*   head;
+    };
+    
+    std::vector<HeadId> heads;
+    
     for (int i = 0; i < modelCount; i++)
     {
         Frag2d* f2d = (Frag2d*)wld->getFrag(refs[i]);
@@ -602,7 +610,11 @@ void WldModel::readAnimatedModel(Frag11* f11)
         if (name[3] == 'h' && name[4] == 'e')
         {
             model = new WldModel(pfs, wld);
-            addHeadModel(model);
+            
+            HeadId h;
+            h.id    = ::strtol(name + 5, nullptr, 10);
+            h.head  = model;
+            heads.push_back(h);
         }
         else
         {
@@ -611,6 +623,13 @@ void WldModel::readAnimatedModel(Frag11* f11)
         
         model->readMaterials(f36);
         model->readMesh(f36, false, &skele);
+    }
+    
+    std::sort(heads.begin(), heads.end(), [](const HeadId& a, const HeadId& b) { return a.id < b.id; });
+    
+    for (auto& h : heads)
+    {
+        addHeadModel(h.head);
     }
 }
 

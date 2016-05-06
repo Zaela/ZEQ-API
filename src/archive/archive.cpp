@@ -179,7 +179,6 @@ zeq_model_proto_t* zeq_archive_t::loadModel(const std::string& name, zeq_model_p
 zeq_model_proto_t* zeq_archive_t::loadModelWLD(const std::string& name, zeq_model_proto_t* inheritAnimationsFrom)
 {
     WLD* wld = m_mainWld;
-    (void)inheritAnimationsFrom;
     
     if (!wld)
         return nullptr;
@@ -189,7 +188,7 @@ zeq_model_proto_t* zeq_archive_t::loadModelWLD(const std::string& name, zeq_mode
     
     bool isItem = (name[0] == 'i' && name[1] == 't');
     
-    zeq_model_proto_t* proto = new zeq_model_proto_t(model, isItem ? ZEQ_MODEL_ITEM : ZEQ_MODEL_MOB, zeq_model_proto_t::BaseTransform::Wld);
+    zeq_model_proto_t* proto = new zeq_model_proto_t(model, isItem ? ZEQ_MODEL_ITEM : ZEQ_MODEL_MOB, inheritAnimationsFrom, zeq_model_proto_t::BaseTransform::Wld);
         
     proto->grab();
     return proto;
@@ -222,7 +221,7 @@ zeq_model_proto_t* zeq_archive_t::loadModelEQG(const std::string& name)
         else
             model.loadCommon();
         
-        zeq_model_proto_t* proto = new zeq_model_proto_t(model, ZEQ_MODEL_MOB, zeq_model_proto_t::BaseTransform::Eqg);
+        zeq_model_proto_t* proto = new zeq_model_proto_t(model, ZEQ_MODEL_MOB, nullptr, zeq_model_proto_t::BaseTransform::Eqg);
         
         proto->grab();
         return proto;

@@ -212,6 +212,23 @@ void AnimationSet::addAnimation(int animId, Animation* anim)
     m_animations.push_back(ai);
 }
 
+void AnimationSet::inherit(AnimationSet& o)
+{
+    for (auto& oi : o.m_animations)
+    {
+        for (auto& ai : m_animations)
+        {
+            if (ai.id == oi.id)
+                goto skip;
+        }
+        
+        oi.anim->grab();
+        m_animations.push_back(oi);
+        
+    skip: ;
+    }
+}
+
 Animation* AnimationSet::getAnimation(int animId)
 {
     for (auto& ai : m_animations)

@@ -63,7 +63,7 @@ private:
     void registerWithOpenGL();
     
 public:
-    zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, BaseTransform = NoTransform);
+    zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, zeq_model_proto_t* inheritAnimsFrom = nullptr, BaseTransform = NoTransform);
     ~zeq_model_proto_t();
 
     zeq_model_inst_t* createInstance();
