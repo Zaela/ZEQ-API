@@ -37,6 +37,7 @@ void ConvSkeleton::setAttachPointType(uint32_t index, AttachPoint::Type type)
 void ConvSkeleton::addBoneNameToIndex(const std::string& name, uint32_t index)
 {
     m_indicesByBoneName[name] = index;
+    m_boneArray[index].name = name.c_str() + 3;
 }
 
 void ConvSkeleton::addChild(uint32_t parent, uint32_t child)

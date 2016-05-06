@@ -15,7 +15,18 @@ zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, ze
     m_skeleton.init(model.skeleton());
     
     if (inheritAnimsFrom)
-        m_animations.inherit(inheritAnimsFrom->animations());
+    {
+        if (m_skeleton.hasMatchingBoneOrder(inheritAnimsFrom->skeleton()))
+        {
+            m_animations.inherit(inheritAnimsFrom->animations());
+        }
+        else
+        {
+            std::unordered_map<uint32_t, uint32_t> reindex;
+            m_skeleton.buildBoneReindexingMap(inheritAnimsFrom->skeleton(), reindex);
+            m_animations.inheritReindexed(inheritAnimsFrom->animations(), reindex);
+        }
+    }
     
     if (isEqg())
     {

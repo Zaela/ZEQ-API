@@ -551,7 +551,6 @@ void WldModel::readAnimatedModel(Frag11* f11)
     {
         uint32_t frameCount = 0;
         uint32_t frameRate  = 0;
-        uint32_t boneIndex  = 0;
         
         for (Frag12PlusBoneIndex& fbi : p.second)
         {
@@ -560,15 +559,12 @@ void WldModel::readAnimatedModel(Frag11* f11)
             if (f12->count > frameCount)
                 frameCount = f12->count;
             
-            if (fbi.boneIndex > boneIndex)
-                boneIndex = fbi.boneIndex;
-            
             if (frameRate == 0 && fbi.frameRate)
                 frameRate = fbi.frameRate;
         }
         
         printf("anim %i frameRate: %u\n", p.first, frameRate);
-        Animation* anim = Animation::create(frameCount, frameRate, boneIndex);
+        Animation* anim = Animation::create(frameCount, frameRate, boneCount);
         
         for (Frag12PlusBoneIndex& fbi : p.second)
         {

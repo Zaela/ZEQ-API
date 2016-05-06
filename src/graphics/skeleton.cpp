@@ -14,15 +14,18 @@ Skeleton::Skeleton(const Skeleton& copy)
     Bone* bones     = copy.m_boneArray;
     uint32_t count  = copy.m_boneCount;
     m_boneArray     = new Bone[count];
-    memcpy(m_boneArray, copy.m_boneArray, sizeof(Bone) * count);
     
     for (uint32_t i = 0; i < count; i++)
     {
-        Bone& bone = bones[i];
-        if (bone.parentGlobalAnimMatrix)
+        Bone& src = bones[i];
+        Bone& dst = m_boneArray[i];
+        
+        dst = src;
+        
+        if (src.parentGlobalAnimMatrix)
         {
-            uint32_t c = (uint32_t)(((byte*)bone.parentGlobalAnimMatrix) - ((byte*)bones));
-            m_boneArray[i].parentGlobalAnimMatrix = (Mat4*)(((byte*)m_boneArray) + c);
+            uint32_t c = (uint32_t)(((byte*)src.parentGlobalAnimMatrix) - ((byte*)bones));
+            dst.parentGlobalAnimMatrix = (Mat4*)(((byte*)m_boneArray) + c);
         }
     }
 }
@@ -48,6 +51,8 @@ void Skeleton::init(ConvSkeleton& skele)
     {
         Bone* dst               = &bones[index];
         ConvSkeleton::Bone& src = srcArray[index];
+        
+        dst->name   = src.name;
         
         dst->pos    = src.pos;
         dst->rot    = src.rot;
@@ -88,4 +93,44 @@ void Skeleton::init(ConvSkeleton& skele)
     
     m_boneCount = count;
     m_boneArray = bones;
+}
+
+bool Skeleton::hasMatchingBoneOrder(const Skeleton& skele)
+{
+    uint32_t n = (m_boneCount <= skele.m_boneCount) ? m_boneCount : skele.m_boneCount;
+    
+    for (uint32_t i = 0; i < n; i++)
+    {
+        if (m_boneArray[i].name.compare(skele.m_boneArray[i].name) != 0)
+            return false;
+    }
+    
+    return true;
+}
+
+void Skeleton::buildBoneReindexingMap(const Skeleton& skele, std::unordered_map<uint32_t, uint32_t>& map)
+{
+    uint32_t dstCount   = m_boneCount;
+    uint32_t srcCount   = skele.m_boneCount;
+    uint32_t start      = 0;
+
+    for (uint32_t i = 0; i < dstCount; i++)
+    {
+        Bone& dst = m_boneArray[i];
+        
+        for (uint32_t j = start; j < srcCount; j++)
+        {
+            if (dst.name.compare(skele.m_boneArray[j].name) == 0)
+            {
+                map[j] = i;
+                
+                if (j == start)
+                    start++;
+
+                goto next;
+            }
+        }
+        
+    next: ;
+    }
 }

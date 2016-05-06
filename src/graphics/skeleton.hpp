@@ -7,12 +7,16 @@
 #include "attach_point.hpp"
 #include "mat4.hpp"
 #include <functional>
+#include <string>
+#include <unordered_map>
 
 class Skeleton
 {
 public:
     struct Bone
     {
+        std::string         name;
+        
         Vec3                pos;
         Quaternion          rot;
         Vec3                scale;
@@ -41,6 +45,9 @@ public:
     
     uint32_t boneCount() const { return m_boneCount; }
     Bone* bones() { return m_boneArray; }
+    
+    bool hasMatchingBoneOrder(const Skeleton& skele);
+    void buildBoneReindexingMap(const Skeleton& skele, std::unordered_map<uint32_t, uint32_t>& map);
 };
 
 #endif//_ZEQ_SKELETON_HPP_

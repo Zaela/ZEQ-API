@@ -8,6 +8,7 @@
 #include "vec3.hpp"
 #include "quaternion.hpp"
 #include <vector>
+#include <unordered_map>
 
 class Animation : public RefCounter
 {
@@ -32,11 +33,13 @@ private:
 
 private:
     Animation(uint32_t frameCount, uint32_t frameRate, uint32_t highBoneIndex);
+    Animation(const Animation& o);
 
     void add(std::vector<Frame>& frames, uint32_t i, Frag12Entry& ent);
     
 public:
     static Animation* create(uint32_t frameCount, uint32_t frameRate, uint32_t highBoneIndex);
+    static Animation* copyReindexed(const Animation* anim, std::unordered_map<uint32_t, uint32_t>& map);
     virtual ~Animation();
 
     void addFrames(uint32_t boneIndex, Frag12* f12);
@@ -67,6 +70,7 @@ public:
 
     void addAnimation(int animId, Animation* anim);
     void inherit(AnimationSet& o);
+    void inheritReindexed(AnimationSet& o, std::unordered_map<uint32_t, uint32_t>& map);
 
     Animation* getAnimation(int animId);
 };

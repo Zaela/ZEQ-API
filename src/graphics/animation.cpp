@@ -13,6 +13,25 @@ Animation* Animation::create(uint32_t frameCount, uint32_t frameRate, uint32_t h
     return anim;
 }
 
+Animation* Animation::copyReindexed(const Animation* src, std::unordered_map<uint32_t, uint32_t>& map)
+{
+    uint32_t count = src->m_boneCount;
+    
+    Animation* anim = (Animation*)(new byte[sizeof(Animation) - sizeof(std::vector<Frame>) + sizeof(std::vector<Frame>) * count]);
+    
+    new (anim) Animation(*src);
+    
+    for (uint32_t i = 0; i < count; i++)
+    {
+        if (!map.count(i))
+            continue;
+        
+        anim->m_framesByBoneIndex[map[i]] = src->m_framesByBoneIndex[i];
+    }
+    
+    return anim;
+}
+
 Animation::Animation(uint32_t frameCount, uint32_t frameRate, uint32_t highBoneIndex)
 : m_boneCount(highBoneIndex),
   m_durationMs((frameCount * frameRate) * 0.001f),
@@ -20,6 +39,18 @@ Animation::Animation(uint32_t frameCount, uint32_t frameRate, uint32_t highBoneI
   m_frameCount(frameCount)
 {
     for (uint32_t i = 1; i < highBoneIndex; i++)
+    {
+        new (&m_framesByBoneIndex[i]) std::vector<Frame>;
+    }
+}
+
+Animation::Animation(const Animation& o)
+: m_boneCount(o.m_boneCount),
+  m_durationMs(o.m_durationMs),
+  m_frameRate(o.m_frameRate),
+  m_frameCount(o.m_frameCount)
+{
+    for (uint32_t i = 1; i < m_boneCount; i++)
     {
         new (&m_framesByBoneIndex[i]) std::vector<Frame>;
     }
@@ -224,6 +255,29 @@ void AnimationSet::inherit(AnimationSet& o)
         
         oi.anim->grab();
         m_animations.push_back(oi);
+        
+    skip: ;
+    }
+}
+
+void AnimationSet::inheritReindexed(AnimationSet& o, std::unordered_map<uint32_t, uint32_t>& map)
+{
+    for (auto& oi : o.m_animations)
+    {
+        for (auto& ai : m_animations)
+        {
+            if (ai.id == oi.id)
+                goto skip;
+        }
+        
+        AnimationPlusId ai;
+    
+        ai.id   = oi.id;
+        ai.anim = Animation::copyReindexed(oi.anim, map);
+        
+        ai.anim->grab();
+        
+        m_animations.push_back(ai);
         
     skip: ;
     }

@@ -9,12 +9,14 @@
 #include "attach_point.hpp"
 #include "quaternion.hpp"
 #include <unordered_map>
+#include <string>
 
 class ConvSkeleton
 {
 public:
     struct Bone
     {
+        std::string             name;
         std::vector<uint32_t>   children;
         AttachPoint::Type       attachPointType;
         Vec3                    pos;
