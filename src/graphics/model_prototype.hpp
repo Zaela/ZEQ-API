@@ -8,6 +8,7 @@
 #include "conv_model.hpp"
 #include "conv_vertex_buffer.hpp"
 #include "skeleton.hpp"
+#include "animation.hpp"
 
 struct zeq_model_proto_t : public RefCounter
 {
@@ -41,6 +42,7 @@ private:
     std::vector<VertexBuffer*>  m_vertexBuffers;
     std::vector<VertexBuffer*>  m_vertexBuffersNoCollide;
     Skeleton                    m_skeleton;
+    AnimationSet                m_animations;
     std::vector<SimpleHead>     m_simpleHeads;
     std::vector<WeightedHead>   m_weightedHeads;
 
@@ -82,6 +84,7 @@ public:
     
     Skeleton& skeleton() { return m_skeleton; }
     std::vector<SimpleHead>& getSimpleHeads() { return m_simpleHeads; }
+    AnimationSet& animations() { return m_animations; }
 };
 
 #endif//_ZEQ_MODEL_PROTOTYPE_HPP_

@@ -13,8 +13,6 @@ class Skeleton
 public:
     struct Bone
     {
-        bool                hasAnimFrames;
-        
         Vec3                pos;
         Quaternion          rot;
         Vec3                scale;
@@ -31,7 +29,6 @@ public:
 private:
     uint32_t    m_boneCount;
     Bone*       m_boneArray;
-    bool        m_isCopy;
     
 public:
     Skeleton();

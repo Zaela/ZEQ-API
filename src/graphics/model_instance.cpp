@@ -61,3 +61,20 @@ void zeq_model_draw(zeq_model_inst_t* inst, zeq_camera_t* cam)
     
     inst->draw();
 }
+
+void zeq_model_start_animation(zeq_model_inst_t* inst, int animId)
+{
+    if (!inst->isAnimated())
+        return;
+    
+    inst->getAnimated().setAnimation(animId);
+}
+
+void zeq_model_animate(zeq_model_inst_t* inst, zeq_delta_t delta)
+{
+    if (!inst->isAnimated())
+        return;
+    
+    AABB box;
+    inst->getAnimated().animate(delta.seconds, box);
+}

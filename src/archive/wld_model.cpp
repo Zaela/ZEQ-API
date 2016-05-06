@@ -37,31 +37,6 @@ void WldModel::readAllMaterials()
     {
         Frag30* f30 = (Frag30*)frag;
         handleF30(f30);
-        /*Frag03* f03 = nullptr;
-        
-        if (f30->ref > 0)
-        {
-            Frag05* f05 = (Frag05*)wld->getFrag(f30->ref);
-            if (!f05) continue;
-            Frag04* f04 = (Frag04*)wld->getFrag(f05->ref);
-            if (!f04) continue;
-            
-            if (!f04->isAnimated())
-            {
-                f03 = (Frag03*)wld->getFrag(f04->ref);
-            }
-            else
-            {
-                handleF04Animated(f04, f30);
-                continue;
-            }
-        }
-        else
-        {
-            f03 = (Frag03*)wld->getFrag(f30->ref);
-        }
-        
-        handleF03(f03, f30);*/
     }
 }
 
@@ -540,6 +515,7 @@ void WldModel::readAnimatedModel(Frag11* f11)
     struct Frag12PlusBoneIndex
     {
         Frag12*     f12;
+        uint32_t    frameRate;
         uint32_t    boneIndex;
     };
     
@@ -561,13 +537,11 @@ void WldModel::readAnimatedModel(Frag11* f11)
         if (!f12 || f12->type() != 0x12)
             continue;
         
-        if (!animsById.count(animId))
-            printf("anim %i\n", animId);
-        
         Frag12PlusBoneIndex fbi;
         
-        fbi.f12         = f12;
-        fbi.boneIndex   = index;
+        fbi.f12             = f12;
+        fbi.frameRate       = f13->getFrameRate();
+        fbi.boneIndex       = index;
         
         animsById[animId].push_back(fbi);
     }
@@ -575,17 +549,33 @@ void WldModel::readAnimatedModel(Frag11* f11)
     // Convert anims
     for (auto& p : animsById)
     {
-        uint32_t lastFrame = 0;
+        uint32_t frameCount = 0;
+        uint32_t frameRate  = 0;
+        uint32_t boneIndex  = 0;
         
         for (Frag12PlusBoneIndex& fbi : p.second)
         {
             Frag12* f12 = fbi.f12;
             
-            if (f12->count > lastFrame)
-                lastFrame = f12->count;
+            if (f12->count > frameCount)
+                frameCount = f12->count;
+            
+            if (fbi.boneIndex > boneIndex)
+                boneIndex = fbi.boneIndex;
+            
+            if (frameRate == 0 && fbi.frameRate)
+                frameRate = fbi.frameRate;
         }
         
-        //addAnimation(p.first, anim);
+        printf("anim %i frameRate: %u\n", p.first, frameRate);
+        Animation* anim = Animation::create(frameCount, frameRate, boneIndex);
+        
+        for (Frag12PlusBoneIndex& fbi : p.second)
+        {
+            anim->addFrames(fbi.boneIndex, fbi.f12);
+        }
+        
+        addAnimation(p.first, anim);
     }
     
     // VertexBuffers and Head models
@@ -619,7 +609,6 @@ void WldModel::readAnimatedModel(Frag11* f11)
             model = this;
         }
         
-        //model->readAllMaterials();
         model->readMaterials(f36);
         model->readMesh(f36, false, &skele);
     }
@@ -670,7 +659,6 @@ void WldModel::readModel(const char* modelId)
     if (!f36 || f36->type() != 0x36)
         throw 7; //fixme
     
-    readAllMaterials();
-    //readMaterials(f36);
+    readMaterials(f36);
     readMesh(f36);
 }

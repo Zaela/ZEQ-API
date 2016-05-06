@@ -8,6 +8,7 @@
 #include "pfs.hpp"
 #include "wld.hpp"
 #include "fragments.hpp"
+#include "animation.hpp"
 #include <unordered_map>
 #include <vector>
 #include <functional>

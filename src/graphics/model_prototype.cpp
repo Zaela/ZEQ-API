@@ -5,6 +5,7 @@
 zeq_model_proto_t::zeq_model_proto_t(ConvModel& model, zeq_model_type_t type, zeq_model_proto_t::BaseTransform baseTransform)
 : m_modelType(type),
   m_baseTransform(baseTransform),
+  m_animations(std::move(model.getAnimationSet())),
   m_registeredWithOpenGL(false),
   m_itemId(0)
 {

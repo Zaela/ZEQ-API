@@ -139,6 +139,12 @@ struct Frag12Entry
             rot.w =  ((float)rotW) / 16384.0f;
         }
     }
+    
+    bool operator!=(const Frag12Entry& o)
+    {
+        return rotW != o.rotW || rotX != o.rotX || rotY != o.rotY || rotZ != o.rotZ ||
+               shiftX != o.shiftX || shiftY != o.shiftY || shiftZ != o.shiftZ || shiftDenom != o.shiftDenom;
+    }
 };
 
 struct Frag12 : public Fragment
@@ -152,7 +158,14 @@ struct Frag13 : public Fragment
 {
     int         ref;
     uint32_t    flag;
-    uint32_t    millisecondsBetweenKeyframes;
+    uint32_t    frameRate;
+    
+    uint32_t getFrameRate()
+    {
+        if (length() >= 24)
+            return frameRate;
+        return 0;
+    }
 };
 
 struct Frag14 : public Fragment

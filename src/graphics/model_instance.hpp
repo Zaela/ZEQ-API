@@ -41,6 +41,9 @@ public:
         else
             m_animated.draw();
     }
+    
+    bool isAnimated() const { return m_isAnimated; }
+    ModelAnimated& getAnimated() { return m_animated; }
 };
 
 #endif//_ZEQ_MODEL_INSTANCE_HPP_

@@ -7,6 +7,7 @@
 #include "conv_material.hpp"
 #include "conv_vertex_buffer.hpp"
 #include "conv_skeleton.hpp"
+#include "animation.hpp"
 #include "pfs.hpp"
 #include "mat4.hpp"
 #include <string>
@@ -31,7 +32,7 @@ private:
     std::vector<ConvModel*>         m_headModels;
 
     ConvSkeleton m_skeleton;
-    //anims
+    AnimationSet m_animSet;
 
     std::unordered_map<std::string, ConvModel*> m_objectModelsByName;
     std::vector<ObjectPlacement>                m_objectPlacementsStatic;
@@ -80,6 +81,9 @@ public:
     std::vector<ConvModel*>& heads() { return m_headModels; }
     
     void addHeadModel(ConvModel* model) { m_headModels.push_back(model); }
+    
+    void addAnimation(int animId, Animation* anim) { m_animSet.addAnimation(animId, anim); }
+    AnimationSet& getAnimationSet() { return m_animSet; }
 };
 
 #endif//_ZEQ_CONV_MODEL_HPP_
